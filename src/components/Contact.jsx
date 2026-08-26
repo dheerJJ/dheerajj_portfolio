@@ -8,12 +8,14 @@ const ContactSection = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [statusMessage, setStatusMessage] = useState({ text: '', type: '' });
 
-    const sendEmail = (e) => {
+    const sendEmail = async (e) => {
         e.preventDefault();
         
         const formData = new FormData(formRef.current);
         const name = formData.get('name');
         const email = formData.get('email');
+        const phone = formData.get('phone') || '';
+        const subject = formData.get('subject') || 'New Portfolio Contact Message';
         const message = formData.get('message');
         
         if (!name || !email || !message) {
@@ -24,23 +26,55 @@ const ContactSection = () => {
         setIsSubmitting(true);
         setStatusMessage({ text: '', type: '' });
 
-        emailjs.sendForm(
-            import.meta.env.VITE_EMAILJS_SERVICE_ID,
-            import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-            formRef.current,
-            import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-        )
-        .then(() => {
-            setStatusMessage({ text: 'Message sent successfully!', type: 'success' });
+        const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+        const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+        const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+        const web3FormsKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
+
+        try {
+            // Option 1: Web3Forms (simplest direct delivery to dheerajjkumawat@gmail.com)
+            if (web3FormsKey && web3FormsKey !== 'your_access_key') {
+                const response = await fetch('https://api.web3forms.com/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        access_key: web3FormsKey,
+                        name,
+                        email,
+                        phone,
+                        subject: subject || `Portfolio Inquiry from ${name}`,
+                        message,
+                        from_name: 'Dheerajj Portfolio'
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    setStatusMessage({ text: 'Message sent successfully! I will get back to you soon.', type: 'success' });
+                    formRef.current.reset();
+                    return;
+                }
+                throw new Error(data.message || 'Web3Forms submission failed');
+            }
+
+            // Option 2: EmailJS
+            if (serviceId && serviceId !== 'your_service_id' && publicKey && publicKey !== 'your_public_key') {
+                await emailjs.sendForm(serviceId, templateId, formRef.current, publicKey);
+                setStatusMessage({ text: 'Message sent successfully! I will get back to you soon.', type: 'success' });
+                formRef.current.reset();
+                return;
+            }
+
+            // Fallback: If no API keys are configured, open mail client
+            const mailtoUrl = `mailto:dheerajjkumawat@gmail.com?subject=${encodeURIComponent(subject || 'Portfolio Inquiry from ' + name)}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\nPhone: ${phone}\n\nMessage:\n${message}`)}`;
+            window.open(mailtoUrl, '_blank');
+            setStatusMessage({ text: 'Opening your email client to send to dheerajjkumawat@gmail.com...', type: 'success' });
             formRef.current.reset();
-        })
-        .catch((error) => {
-            console.error('EmailJS error:', error);
-            setStatusMessage({ text: 'Failed to send message. Please try again later.', type: 'error' });
-        })
-        .finally(() => {
+        } catch (error) {
+            console.error('Contact error:', error);
+            setStatusMessage({ text: 'Failed to send automatically. Please email directly at dheerajjkumawat@gmail.com', type: 'error' });
+        } finally {
             setIsSubmitting(false);
-        });
+        }
     };
 
     return (
