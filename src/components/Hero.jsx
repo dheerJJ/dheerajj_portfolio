@@ -131,8 +131,8 @@ const Hero = ({ onPreloadComplete }) => {
           ref={buttonsRef}
           className="absolute -bottom-20 left-1/2 -translate-x-1/2 md:translate-x-0 md:-bottom-12 md:left-auto md:right-20 flex items-center gap-2 md:gap-4 pointer-events-auto z-10 opacity-0 w-max"
         >
-          <button 
-            onClick={() => scrollToSection('contact')} 
+          <button
+            onClick={() => scrollToSection('contact')}
             className="group w-8 h-8 md:w-12 md:h-12 rounded-full border border-gray-400/30 flex items-center justify-center backdrop-blur-md bg-black/20 hover:bg-white/10 hover:border-gray-400/50 transition-all duration-300 cursor-pointer"
             aria-label="Scroll to Contact"
           >
@@ -141,8 +141,8 @@ const Hero = ({ onPreloadComplete }) => {
             </svg>
           </button>
 
-          <button 
-            onClick={() => scrollToSection('contact')} 
+          <button
+            onClick={() => scrollToSection('contact')}
             className="px-4 py-1.5 md:px-6 md:py-2.5 rounded-full border border-gray-400/30 flex items-center justify-center backdrop-blur-md bg-black/20 hover:bg-white/10 hover:border-gray-400/50 transition-all cursor-pointer"
           >
             <span className="text-gray-300 text-xs md:text-base italic font-light tracking-wider">Contact</span>
